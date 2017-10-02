@@ -21,6 +21,12 @@ if (!validOwner(owner)) {
 }
 
 exports.checkDeadline = function (req, res) {
+  // if it's not a new PR, don't proceed
+  var isPr = req.body.pull_request && req.body.action === 'opened'
+  if (!isPr) {
+    return res.send(`Sorry, not interested.`)
+  }
+
   var id = req.body.hook.id
   var createdTime = new Date(req.body.hook.created_at)
   var endOfSprint = createdTime.getDay() === sprintEndDay

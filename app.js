@@ -7,6 +7,8 @@ const clientId = process.env.CLIENT_ID
 const clientSecret = process.env.CLIENT_SECRET
 const accessToken = process.env.ACCESS_TOKEN
 
+axios.defaults.headers.common['Authorization'] = `Basic ${accessToken}`
+
 if (!validOwner(owner)) {
   throw new Error(`Invalid owner: ${owner}. Please check your 'OWNER' environment variable.`)
 } else if (!validRepo(repo)) {
@@ -14,7 +16,7 @@ if (!validOwner(owner)) {
 }
 
 exports.checkDeadline = function (req, res) {
-  var id = new Date(req.body.hook.id)
+  var id = req.body.hook.id
   var createdTime = new Date(req.body.hook.created_at)
   var endOfSprint = createdTime.getDay() === 2
   var afterDeadline = createdTime.getHours() >= 12
@@ -24,10 +26,11 @@ exports.checkDeadline = function (req, res) {
     return res.end()
   }
 
-  axios.post(`https://api.github.com/repos/${owner}/${repo}/issues/${id}/labels`, {
-    access_token: accessToken,
-    data: ['late']
-  })
+  axios
+    .post(`https://api.github.com/repos/${owner}/${repo}/issues/${id}/labels`, ['late'])
+    .catch(err => {
+      console.error(err)
+    })
 
   return res.end()
 }
@@ -48,6 +51,6 @@ exports.authCallback = function (req, res) {
       return res.send(`Access token: ${accessToken}`).end()
     })
     .catch(err => {
-      return res.json(err).end()
+      return res.send(err).end()
     })
 }

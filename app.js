@@ -6,6 +6,9 @@ const repo = process.env.REPO
 const clientId = process.env.CLIENT_ID
 const clientSecret = process.env.CLIENT_SECRET
 const accessToken = process.env.ACCESS_TOKEN
+// end of sprint defaults to midday Friday
+const sprintEndDay = process.env.SPRINT_END_DAY || 5
+const sprintEndHour = process.env.SPRINT_END_HOUR || 12
 
 axios.defaults.headers.common['Authorization'] = `Basic ${accessToken}`
 
@@ -13,17 +16,21 @@ if (!validOwner(owner)) {
   throw new Error(`Invalid owner: ${owner}. Please check your 'OWNER' environment variable.`)
 } else if (!validRepo(repo)) {
   throw new Error(`Invalid repo: ${repo}. Please check your 'REPO' environment variable.`)
+} else if (!accessToken) {
+  throw new Error(`Missing GitHub API access token. Please check your 'ACCESS_TOKEN' environment variable.`)
 }
 
 exports.checkDeadline = function (req, res) {
   var id = req.body.hook.id
   var createdTime = new Date(req.body.hook.created_at)
-  var endOfSprint = createdTime.getDay() === 2
-  var afterDeadline = createdTime.getHours() >= 12
+  var endOfSprint = createdTime.getDay() === sprintEndDay
+  var afterDeadline = createdTime.getHours() >= sprintEndHour
 
   // if it's not after 12pm on a Tuesday, don't do anything
-  if (!endOfSprint || !afterDeadline) {
-    return res.end()
+  if (!endOfSprint) {
+    return res.send(`It's not Tuesday, yet! You've still got time before the end of the sprint 👌`)
+  } else if (!afterDeadline) {
+    return res.send(`It's not midday, yet! You got the PR in on time 🎉`)
   }
 
   axios
@@ -32,7 +39,7 @@ exports.checkDeadline = function (req, res) {
       console.error(err)
     })
 
-  return res.end()
+  return res.send(`Too late! 💩 This will have to be merged in at the start of next sprint.`)
 }
 
 exports.auth = function (req, res) {

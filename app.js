@@ -27,8 +27,8 @@ exports.checkDeadline = function (req, res) {
     return res.send(`Sorry, not interested.`)
   }
 
-  var id = req.body.hook.id
-  var createdTime = new Date(req.body.hook.created_at)
+  var id = req.body.number
+  var createdTime = new Date(req.body.pull_request.created_at)
   var endOfSprint = createdTime.getDay() === sprintEndDay
   var afterDeadline = createdTime.getHours() >= sprintEndHour
 

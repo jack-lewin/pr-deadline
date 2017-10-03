@@ -7,8 +7,8 @@ const clientId = process.env.CLIENT_ID
 const clientSecret = process.env.CLIENT_SECRET
 const accessToken = process.env.ACCESS_TOKEN
 // end of sprint defaults to midday Friday
-const sprintEndDay = process.env.SPRINT_END_DAY || 5
-const sprintEndHour = process.env.SPRINT_END_HOUR || 12
+const sprintEndDay = parseInt(process.env.SPRINT_END_DAY || 5)
+const sprintEndHour = parseInt(process.env.SPRINT_END_HOUR || 12)
 
 axios.defaults.headers.common['Authorization'] = `Basic ${accessToken}`
 
